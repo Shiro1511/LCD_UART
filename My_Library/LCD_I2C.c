@@ -11,7 +11,7 @@ static void LCD_Send4Bits(LCD_HandleTypeDef *LCDx, uint8_t data, uint8_t mode)
 
     /* Send High Nibble */
     data_rx[0] = high_nibble | LCD_EN_SET;  /* EN = 1 */
-    data_rx[0] = high_nibble & ~LCD_EN_SET; /* EN = 0 */
+    data_rx[1] = high_nibble & ~LCD_EN_SET; /* EN = 0 */
 
     /* Send Low Nibble */
     data_rx[2] = low_nibble | LCD_EN_SET;  /* EN = 1 */
