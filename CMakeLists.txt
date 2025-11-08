@@ -42,10 +42,12 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 
+file(GLOB MY_LIB_SOURCES "${CMAKE_SOURCE_DIR}/My Library/*.c")
+
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
-    "${CMAKE_SOURCE_DIR}/My Library/LCD_I2C.c"
+    ${MY_LIB_SOURCES}
 )
 
 # Add include paths
