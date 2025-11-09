@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "LCD_I2C.h"
 #include "UART_Handle.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +49,8 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 uint8_t data_rx;
 LCD_HandleTypeDef hlcd1;
+char uart_buffer[17] = "";
+uint8_t buffer_index = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,10 +130,46 @@ int main(void)
     if (UART_Handle_Available() > 0)
     {
       uint8_t received_data = UART_Handle_Read();
-      LCD_Clear_Display(&hlcd1);
-      LCD_ScrollText(&hlcd1, 0, (char *)&received_data, 500);
+
+      // Chỉ thêm ký tự in được vào buffer
+      if (received_data >= 32 && received_data <= 126 && buffer_index < 16)
+      {
+        uart_buffer[buffer_index++] = received_data;
+        uart_buffer[buffer_index] = '\0'; // Luôn kết thúc chuỗi
+      }
+
+      // Reset buffer khi nhận Enter hoặc đầy
+      if (received_data == '\r' || received_data == '\n' || buffer_index >= 16)
+      {
+        // Hiển thị chuỗi đã nhận trước khi reset
+        LCD_Clear_Display(&hlcd1);
+        LCD_SetCursor(&hlcd1, 0, 0);
+        LCD_Print(&hlcd1, "Received:");
+        LCD_SetCursor(&hlcd1, 0, 1);
+        LCD_Print(&hlcd1, uart_buffer);
+
+        // Reset buffer
+        buffer_index = 0;
+        uart_buffer[0] = '\0';
+
+        HAL_Delay(2000); // Hiển thị trong 2 giây
+        LCD_Clear_Display(&hlcd1);
+        LCD_SetCursor(&hlcd1, 0, 0);
+        LCD_Print(&hlcd1, "Ready...");
+      }
+      else
+      {
+        // Hiển thị tạm thời ký tự vừa nhận
+        LCD_Clear_Display(&hlcd1);
+        LCD_SetCursor(&hlcd1, 0, 0);
+        LCD_Print(&hlcd1, "Typing:");
+        LCD_SetCursor(&hlcd1, 0, 1);
+        LCD_Print(&hlcd1, uart_buffer);
+      }
+
       HAL_UART_Transmit(&huart1, &received_data, 1, 1000);
     }
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
